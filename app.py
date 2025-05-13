@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, send_file, redirect, url_for
-from autocorrect import Speller
+from autocorrect.autocorrect import Speller
 from io import BytesIO
 import json
 from stats import generar_estadisticas
