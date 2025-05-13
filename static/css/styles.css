@@ -1,0 +1,31 @@
+.tab {
+    display: inline-block;
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+}
+
+.tab-content {
+    display: none;
+    margin-top: 20px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.error {
+    color: red;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+textarea {
+    width: calc(100% - 20px);
+    height: 150px;
+    resize: none;
+    margin: 10px 0;
+    padding: 10px;
+    box-sizing: border-box;
+}

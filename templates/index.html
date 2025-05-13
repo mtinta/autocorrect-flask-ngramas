@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width = device-width, initial-scale = 1.0" />
+    <title>Autocorrector</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename = 'css/styles.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      .tab {
+        cursor: pointer;
+        padding: 5px 10px;
+        background-color: #007bff;
+        color: white;
+        display: inline-block;
+        border-radius: 3px;
+        margin-right: 5px;
+      }
+      .tab:hover {
+        background-color: #0056b3;
+      }
+      .tab-content {
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-4">
+      <h1>Autocorrector</h1>
+      <!-- Detección de error en texto -->
+      {% if error %}
+      <div class="alert alert-danger">{{ error }}</div>
+      {% endif %}
+
+      <!-- Pestañas de opciones -->
+      <div>
+        <div class="tab" onclick="showTab('textTab')">Escribir texto</div>
+        <div class="tab" onclick="showTab('fileTab')">Subir archivo</div>
+      </div>
+
+      <!-- Formulario -->
+      <form
+        action="{{ url_for('procesar') }}"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        <!-- Para texto -->
+        <div id="textTab" class="tab-content">
+          <label for="texto">Escriba su texto:</label>
+          <textarea
+            class="form-control"
+            name="texto"
+            id="texto"
+            placeholder="Texto a corregir..."
+            rows="5"
+          ></textarea>
+        </div>
+
+        <!-- Para subir archivo -->
+        <div id="fileTab" class="tab-content" style="display: none">
+          <div class="form-group">
+            <label for="archivo">Suba su archivo de texto:</label>
+            <input
+              type="file"
+              class="form-control-file"
+              name="archivo"
+              id="archivo"
+            />
+          </div>
+        </div>
+
+        <!-- Para detectar la opción de entrada -->
+        <input type="hidden" id="input_type" name="input_type" value="text" />
+
+        <!-- Sección de configuración de parámetros -->
+        <h3>Configuración de Parámetros</h3>
+        <div class="form-group">
+          <label for="context_threshold">
+            Context Threshold: <span id="contextValue">1</span>
+          </label>
+          <input
+            type="range"
+            class="form-control-range"
+            name="context_threshold"
+            id="context_threshold"
+            min="1"
+            max="8"
+            step="1"
+            value="1"
+            oninput="updateSlider(this, 'contextValue')"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="threshold">
+            Threshold: <span id="thresholdValue">1</span>
+          </label>
+          <input
+            type="range"
+            class="form-control-range"
+            name="threshold"
+            id="threshold"
+            min="1"
+            max="20"
+            step="1"
+            value="1"
+            oninput="updateSlider(this, 'thresholdValue')"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="selected_dictionary">Diccionario de Frecuencia</label>
+          <select
+            class="form-control"
+            name="selected_dictionary"
+            id="selected_dictionary"
+          >
+            <option value="CREA">CREA (RAE)</option>
+            <option value="EURO">Europarl</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="selected_bigram">Modelo de Bigramas</label>
+          <select
+            class="form-control"
+            name="selected_bigram"
+            id="selected_bigram"
+          >
+            <option value="MarkDavies">MarkDavies</option>
+            <option value="Europarl">Europarl</option>
+          </select>
+        </div>
+
+        <input type="submit" value="Corregir texto" />
+      </form>
+
+      <h3>Texto original:</h3>
+      <textarea readonly>{{ texto_original }}</textarea>
+
+      <!-- Checkbox para mostrar/ocultar resaltado en el texto corregido -->
+      <div>
+        <input
+          type="checkbox"
+          id="toggleHighlight"
+          onchange="toggleHighlighting()"
+        />
+        <label for="toggleHighlight"
+          >Mostrar palabras corregidas resaltadas</label
+        >
+      </div>
+
+      <h3>Texto corregido:</h3>
+      <div id="correctedText">{{ texto_corregido_resaltado|safe }}</div>
+      <form action="{{ url_for('descargar') }}" method="POST">
+        <input
+          type="hidden"
+          name="texto_corregido"
+          value="{{ texto_corregido }}"
+        />
+        <br />
+        <button type="submit">Descargar archivo corregido</button>
+      </form>
+
+      {% if stats %}
+      <h3>Estadísticas del Texto</h3>
+      <ul>
+        <li>Total de palabras: {{ stats.total_palabras }}</li>
+        <li>Total de oraciones: {{ stats.total_oraciones }}</li>
+        <li>Palabras corregidas: {{ stats.palabras_corregidas }}</li>
+        <li>Palabras no corregidas: {{ stats.palabras_no_corregidas }}</li>
+        <li>
+          Porcentaje de palabras modificadas: {{ stats.porcentaje_cambiado }}%
+        </li>
+      </ul>
+      {% endif %}
+    </div>
+
+    <!-- Scripts de Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+  </body>
+</html>
